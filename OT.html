@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mantenimiento HNB - Ordenes de Trabajo</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={theme:{extend:{colors:{
+pri:{50:'#E8F0F8',100:'#C8D9EC',200:'#8FB3D9',300:'#568DC6',400:'#2D6CB3',500:'#1B2A4A',600:'#152240',700:'#101A33',800:'#0B1226',900:'#060919'},
+acc:{50:'#E6F5F0',100:'#B8E0D4',200:'#8ACBB8',300:'#5CB69C',400:'#2EA180',500:'#0A6E5C',600:'#085A4C',700:'#06473D',800:'#04332D',900:'#02201D'},
+sf:{50:'#F4F5F0',100:'#E8EAE2',200:'#D8DBD2',300:'#B8BDB0',400:'#8A9080',500:'#6B7264',600:'#4D5348',700:'#33372F',800:'#1A1D1A',900:'#0D0F0D'}
+},fontFamily:{display:['Space Grotesk','sans-serif'],body:['DM Sans','sans-serif']}}}}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',sans-serif;background:#F4F5F0;color:#1A1D1A;overflow-x:hidden;min-height:100vh;min-height:100dvh}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#B8BDB0;border-radius:4px}
+
+/* ===== LOGIN ===== */
+#screen-login{
+  background:linear-gradient(160deg,#060919 0%,#101A33 25%,#1B2A4A 55%,#0A6E5C 100%);
+  position:fixed;inset:0;z-index:50;
+  display:flex;flex-direction:column;justify-content:space-between;align-items:center;
+  padding:0;
+  overflow-y:auto;
+  transition:opacity .3s,visibility .3s;
+}
+#screen-login.oculto{opacity:0;visibility:hidden;pointer-events:none}
+#screen-login::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");pointer-events:none}
+
+.login-top{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;width:100%;padding:40px 24px 20px;position:relative;z-index:1}
+.login-logo-wrap{width:100%;max-width:340px;display:flex;justify-content:center;margin-bottom:20px}
+.login-logo-wrap img{width:100%;max-width:340px;height:auto;object-fit:contain}
+.login-logo-fb{display:none;width:100%;max-width:340px;justify-content:center;align-items:center}
+.login-logo-fb span{font-display:font-bold;font-size:48px;color:white;letter-spacing:4px}
+.login-sub{color:rgba(255,255,255,0.45);font-size:11px;letter-spacing:3px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;margin-bottom:16px}
+.login-line{width:60px;height:2px;background:linear-gradient(90deg,transparent,#0A6E5C,transparent);margin-bottom:0}
+
+.login-form-wrap{width:100%;max-width:380px;padding:0 24px 32px;position:relative;z-index:1}
+.login-card{backdrop-filter:blur(20px);background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:28px 24px}
+.login-input{width:100%;padding:12px 16px;border-radius:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:white;font-size:14px;font-family:'DM Sans',sans-serif;transition:border-color .2s}
+.login-input:focus{outline:none;border-color:rgba(255,255,255,0.35)}
+.login-input::placeholder{color:rgba(255,255,255,0.25)}
+.login-label{display:block;color:rgba(255,255,255,0.55);font-size:11px;font-weight:500;margin-bottom:6px}
+.login-btn{width:100%;padding:14px;border-radius:14px;background:#0A6E5C;color:white;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;border:none;cursor:pointer;transition:all .15s;margin-top:4px}
+.login-btn:active{transform:scale(0.98);background:#085A4C}
+
+.login-bottom{width:100%;display:flex;justify-content:center;padding:20px 24px 32px;position:relative;z-index:1}
+.login-bottom img{height:48px;width:auto;opacity:0.6}
+
+/* ===== APP ===== */
+.app-header{position:fixed;top:0;left:0;right:0;height:58px;z-index:40;background:rgba(244,245,240,0.95);backdrop-filter:blur(14px);border-bottom:1px solid #D8DBD2}
+.header-logo{height:42px;width:auto;border-radius:4px;object-fit:contain}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:66px;z-index:40;background:rgba(255,255,255,0.97);backdrop-filter:blur(14px);border-top:1px solid #D8DBD2;padding-bottom:env(safe-area-inset-bottom)}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:#8A9080;transition:color .2s;flex:1;background:none;border:none;cursor:pointer}
+.nav-item.active{color:#1B2A4A}
+.nav-item i{font-size:18px}
+.content-area{padding-top:66px;padding-bottom:82px;min-height:100vh;min-height:100dvh}
+
+.card{background:#fff;border-radius:12px;border:1px solid #E8EAE2;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.card-hover{transition:transform .15s}.card-hover:active{transform:scale(0.985)}
+
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap}
+.badge-pendiente{background:#E8EAE2;color:#6B7264}
+.badge-proceso{background:#FEF3CD;color:#856404}
+.badge-conformidad{background:#C8D9EC;color:#1B2A4A}
+.badge-conformada{background:#D4EDDA;color:#155724}
+
+.sig-canvas{touch-action:none;border:2px dashed #D8DBD2;border-radius:8px;background:#FAFBF8;cursor:crosshair}
+.sig-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#B8BDB0;font-size:13px;pointer-events:none;transition:opacity .2s}
+.sig-placeholder.hidden{opacity:0}
+
+.tl-item{position:relative;padding-left:26px;padding-bottom:14px}
+.tl-item::before{content:'';position:absolute;left:5px;top:8px;bottom:0;width:1px;background:#D8DBD2}
+.tl-item:last-child::before{display:none}
+.tl-dot{position:absolute;left:0;top:4px;width:11px;height:11px;border-radius:50%;border:2px solid #1B2A4A;background:#fff}
+.tl-dot.cur{background:#1B2A4A}
+
+.toast-container{position:fixed;top:66px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;width:90%;max-width:380px;pointer-events:none}
+.toast{padding:12px 16px;border-radius:10px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(-10px);transition:all .3s;pointer-events:auto;box-shadow:0 4px 20px rgba(0,0,0,0.12)}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast-success{background:#D4EDDA;color:#155724}
+.toast-error{background:#F8D7DA;color:#721C24}
+.toast-info{background:#C8D9EC;color:#1B2A4A}
+
+.modal-overlay{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,0.5);display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.active{display:flex}
+.modal-sheet{background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:500px;max-height:92vh;overflow-y:auto;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:#D8DBD2;border-radius:2px;margin:10px auto 0}
+
+@keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.anim-in{animation:fadeInUp .35s ease both}
+.anim-d1{animation-delay:.05s}.anim-d2{animation-delay:.12s}.anim-d3{animation-delay:.2s}.anim-d4{animation-delay:.28s}
+
+.chip{padding:6px 14px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap;border:1px solid #D8DBD2;color:#6B7264;background:#fff;transition:all .2s}
+.chip.active{background:#1B2A4A;color:#fff;border-color:#1B2A4A}
+
+.input{width:100%;padding:10px 14px;border:1.5px solid #D8DBD2;border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:#fff;transition:border-color .2s}
+.input:focus{outline:none;border-color:#1B2A4A}
+.input::placeholder{color:#B8BDB0}
+select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7264' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+
+.btn-pri{background:#1B2A4A;color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;padding:12px;border-radius:12px;border:none;width:100%;cursor:pointer;transition:all .15s}
+.btn-pri:active{transform:scale(0.98)}
+.btn-green{background:#0A6E5C;color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;padding:12px;border-radius:12px;border:none;width:100%;cursor:pointer;transition:all .15s}
+.btn-green:active{transform:scale(0.98)}
+.btn-blue{background:#2D6CB3;color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;padding:12px;border-radius:12px;border:none;width:100%;cursor:pointer;transition:all .15s}
+.btn-blue:active{transform:scale(0.98)}
+.btn-amber{background:#856404;color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;padding:12px;border-radius:12px;border:none;width:100%;cursor:pointer;transition:all .15s}
+.btn-amber:active{transform:scale(0.98)}
+
+.dev-footer{display:flex;flex-direction:column;align-items:center;gap:4px;padding:28px 0 8px;opacity:0.7}
+.dev-footer img{height:52px;width:auto}
+.dev-footer-fb{display:none;font-size:10px;color:#8A9080;text-align:center;line-height:1.4}
+
+@media print{
+  body>*{display:none!important}
+  #print-area{display:block!important;position:fixed;inset:0;background:#fff;z-index:99999;padding:20px;font-size:11px;color:#000;overflow-y:auto}
+  #print-area *{color:#000!important}
+  #print-area h1{font-size:16px}#print-area h2{font-size:13px;margin-top:14px;border-bottom:1px solid #ccc;padding-bottom:4px}
+  #print-area table{width:100%;border-collapse:collapse;margin-top:6px}
+  #print-area td{padding:4px 8px;border:1px solid #ddd;font-size:11px}
+  #print-area .sig-img{max-height:55px}#print-area .print-logo{height:55px}#print-area .print-dev{height:30px;margin-top:20px;opacity:.6}
+}
+</style>
+</head>
+<body>
+
+<div id="toast-container" class="toast-container"></div>
+
+<!-- ==================== LOGIN (fullscreen, se destruye al ingresar) ==================== -->
+<div id="screen-login">
+  <!-- Parte superior: logo grande centrado -->
+  <div class="login-top">
+    <div class="login-logo-wrap anim-in">
+      <img id="login-logo-img" src="" alt="Hospital Natalio Burd" onerror="this.style.display='none';document.getElementById('login-logo-fb').style.display='flex'">
+      <div id="login-logo-fb" class="login-logo-fb"><span style="font-family:'Space Grotesk',sans-serif;font-weight:700">HNB</span></div>
+    </div>
+    <p class="login-sub anim-in anim-d1">Sector de Mantenimiento</p>
+    <div class="login-line anim-in anim-d2"></div>
+  </div>
+
+  <!-- Parte media: formulario -->
+  <div class="login-form-wrap">
+    <div class="login-card anim-in anim-d2">
+      <div style="margin-bottom:16px">
+        <label class="login-label">Nombre y Apellido</label>
+        <input id="login-nombre" type="text" class="login-input" placeholder="Ej: Garcia, Carlos">
+      </div>
+      <div style="margin-bottom:22px">
+        <label class="login-label">Rol</label>
+        <select id="login-rol" class="login-input" style="appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 12 12%22%3E%3Cpath fill=%22%23ffffff80%22 d=%22M6 8L1 3h10z%22/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 14px center;padding-right:36px">
+          <option value="operario" style="color:#333">Operario de Mantenimiento</option>
+          <option value="solicitante" style="color:#333">Solicitante de Sector</option>
+          <option value="supervisor" style="color:#333">Supervisor</option>
+        </select>
+      </div>
+      <button id="btn-login" class="login-btn">Ingresar al Sistema</button>
+    </div>
+  </div>
+
+  <!-- Parte inferior: pie del desarrollador -->
+  <div class="login-bottom anim-in anim-d3">
+    <img id="dev-logo-login" src="" alt="Sistema Vicus" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <p class="dev-footer-fb" style="color:rgba(255,255,255,0.4)">Sistema Vicus &copy; 2026<br>Ing. Ramiro Perez</p>
+  </div>
+</div>
+
+<!-- ==================== APP ==================== -->
+<div id="screen-app" style="display:none">
+
+  <header class="app-header flex items-center px-3">
+    <img id="header-logo-img" src="" alt="HNB" class="header-logo" onerror="this.style.display='none';document.getElementById('header-logo-fb').style.display='flex'">
+    <div id="header-logo-fb" class="hidden items-center gap-1.5">
+      <div class="w-9 h-9 rounded-lg bg-pri-500 flex items-center justify-center"><span class="font-display font-bold text-xs text-white">HNB</span></div>
+      <span class="font-display font-semibold text-sm text-sf-700">Mantenimiento</span>
+    </div>
+    <div class="ml-auto flex items-center gap-2">
+      <span class="text-[10px] text-sf-400 font-medium hidden sm:inline">Mantenimiento</span>
+      <div class="w-8 h-8 rounded-full bg-pri-50 flex items-center justify-center cursor-pointer" onclick="showView('profile')">
+        <span id="header-iniciales" class="font-display font-semibold text-[11px] text-pri-500"></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="content-area">
+
+    <!-- DASHBOARD -->
+    <div id="view-dashboard" class="px-4 py-2">
+      <p class="text-sf-400 text-xs mb-0.5" id="dash-saludo"></p>
+      <p id="dash-nombre" class="font-display font-bold text-lg text-sf-800 mb-4"></p>
+      <div id="dash-stats" class="grid grid-cols-2 gap-2.5 mb-5"></div>
+      <div class="flex items-center justify-between mb-2.5">
+        <h3 class="font-display font-semibold text-sm text-sf-700">Actividad reciente</h3>
+        <button onclick="showView('list')" class="text-pri-500 text-xs font-medium">Ver todas <i class="fas fa-chevron-right text-[8px] ml-0.5"></i></button>
+      </div>
+      <div id="dash-recientes" class="space-y-2"></div>
+      <div id="footer-dashboard"></div>
+    </div>
+
+    <!-- LISTADO -->
+    <div id="view-list" class="px-4 py-2 hidden">
+      <h2 class="font-display font-bold text-lg text-sf-800 mb-3">Ordenes de Trabajo</h2>
+      <div class="flex gap-2 overflow-x-auto pb-3 mb-2 -mx-1 px-1" style="scrollbar-width:none">
+        <button class="chip active" data-filter="todas">Todas</button>
+        <button class="chip" data-filter="Pendiente">Pendientes</button>
+        <button class="chip" data-filter="En Proceso">En Proceso</button>
+        <button class="chip" data-filter="Conformidad">Conformidad</button>
+        <button class="chip" data-filter="Conformada">Conformadas</button>
+      </div>
+      <div class="relative mb-3">
+        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-sf-300 text-xs"></i>
+        <input id="list-search" type="text" class="input pl-9 text-sm" placeholder="Buscar por numero o sector...">
+      </div>
+      <div id="list-items" class="space-y-2"></div>
+      <div id="list-empty" class="hidden text-center py-12">
+        <i class="fas fa-clipboard-list text-3xl text-sf-200 mb-3"></i>
+        <p class="text-sf-400 text-sm">No se encontraron ordenes</p>
+      </div>
+      <div id="footer-list"></div>
+    </div>
+
+    <!-- NUEVA OT -->
+    <div id="view-new" class="px-4 py-2 hidden">
+      <h2 class="font-display font-bold text-lg text-sf-800 mb-4">Nueva Orden de Trabajo</h2>
+      <form id="form-new" class="space-y-3.5">
+        <div><label class="block text-xs font-medium text-sf-500 mb-1">Sector Solicitante</label><select id="new-sector" class="input" required><option value="">Seleccionar...</option><option>Guardia</option><option>Internacion General</option><option>Terapia Intensiva</option><option>Quirofano</option><option>Maternidad</option><option>Neonatologia</option><option>Laboratorio</option><option>Imagenes</option><option>Farmacia</option><option>Central de Esterilizacion</option><option>Administracion</option><option>Cocina / Dietetica</option><option>Lavanderia</option><option>Consultorios Externos</option><option>Kinesiologia</option><option>Odontologia</option><option>Internacion Pediatria</option><option>Sala de Espera</option><option>Pasillos / Circulacion</option><option>Exterior</option><option>Otro</option></select></div>
+        <div><label class="block text-xs font-medium text-sf-500 mb-1">Ubicacion / Detalle</label><input id="new-ubicacion" type="text" class="input" placeholder="Ej: Piso 1, oficina 3" required></div>
+        <div><label class="block text-xs font-medium text-sf-500 mb-1">Descripcion del trabajo</label><textarea id="new-descripcion" class="input" rows="3" placeholder="Describir la novedad o trabajo solicitado..." required></textarea></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-xs font-medium text-sf-500 mb-1">Tipo de Trabajo</label><select id="new-tipo" class="input" required><option value="">Seleccionar...</option><option>Electrico</option><option>Plomeria / Sanitario</option><option>Carpinteria</option><option>Pintura</option><option>Aire Acondicionado / Ventilacion</option><option>Gas</option><option>Elevadores</option><option>Cerrajeria</option><option>Albanileria</option><option>Refrigeracion</option><option>Mecanica</option><option>Varios</option></select></div>
+          <div><label class="block text-xs font-medium text-sf-500 mb-1">Prioridad</label><select id="new-prioridad" class="input" required><option value="Baja">Baja</option><option value="Media" selected>Media</option><option value="Alta">Alta</option><option value="Urgente">Urgente</option></select></div>
+        </div>
+        <div><label class="block text-xs font-medium text-sf-500 mb-1">Operario Asignado (opcional)</label><input id="new-operario" type="text" class="input" placeholder="Dejar vacio si se asigna despues"></div>
+        <button type="submit" class="btn-green mt-1"><i class="fas fa-plus mr-2"></i>Crear Orden de Trabajo</button>
+      </form>
+      <div id="footer-new"></div>
+    </div>
+
+    <!-- DETALLE -->
+    <div id="view-detail" class="px-4 py-2 hidden">
+      <button onclick="goBack()" class="flex items-center gap-1.5 text-sf-400 text-xs font-medium mb-2 active:text-sf-600"><i class="fas fa-chevron-left text-[10px]"></i> Volver</button>
+      <div id="detail-content"></div>
+      <div id="footer-detail"></div>
+    </div>
+
+    <!-- PERFIL -->
+    <div id="view-profile" class="px-4 py-2 hidden">
+      <h2 class="font-display font-bold text-lg text-sf-800 mb-4">Mi Perfil</h2>
+      <div class="card p-5 mb-3 text-center">
+        <div class="w-16 h-16 rounded-full bg-pri-50 flex items-center justify-center mx-auto mb-3"><span id="prof-iniciales" class="font-display font-bold text-xl text-pri-500"></span></div>
+        <p id="prof-nombre" class="font-display font-semibold text-sf-800"></p>
+        <p id="prof-rol" class="text-sf-400 text-sm"></p>
+      </div>
+      <div id="prof-stats" class="grid grid-cols-3 gap-2.5 mb-3"></div>
+      <div class="card p-4 mb-3">
+        <h3 class="font-display font-semibold text-[10px] text-sf-500 uppercase tracking-wider mb-2.5">Datos del sistema</h3>
+        <div class="space-y-2 text-xs text-sf-500">
+          <div class="flex justify-between"><span>Institucion</span><span class="text-sf-700 font-medium">Hospital Dr. Natalio Burd</span></div>
+          <div class="flex justify-between"><span>Sector</span><span class="text-sf-700 font-medium">Mantenimiento</span></div>
+          <div class="flex justify-between"><span>Total OT</span><span id="prof-total" class="text-sf-700 font-medium">0</span></div>
+          <div class="flex justify-between"><span>Sistema</span><span class="text-sf-700 font-medium">Vicus v1.0</span></div>
+        </div>
+      </div>
+      <button onclick="limpiarDatos()" class="w-full py-2.5 rounded-xl border border-amber-200 text-amber-700 font-display font-semibold text-xs mb-2 active:scale-[0.98] transition"><i class="fas fa-rotate-right mr-1"></i>Restaurar datos de ejemplo</button>
+      <button onclick="cerrarSesion()" class="w-full py-2.5 rounded-xl border border-red-200 text-red-500 font-display font-semibold text-sm mb-4 active:scale-[0.98] transition"><i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesion</button>
+      <div id="footer-profile"></div>
+    </div>
+  </main>
+
+  <nav class="bottom-nav flex items-center justify-around px-2">
+    <button class="nav-item active" data-view="dashboard"><i class="fas fa-house"></i><span>Inicio</span></button>
+    <button class="nav-item" data-view="list"><i class="fas fa-clipboard-list"></i><span>Ordenes</span></button>
+    <button class="nav-item" data-view="new"><i class="fas fa-circle-plus"></i><span>Nueva OT</span></button>
+    <button class="nav-item" data-view="profile"><i class="fas fa-user"></i><span>Perfil</span></button>
+  </nav>
+</div>
+
+<!-- MODAL FIRMA -->
+<div id="modal-firma" class="modal-overlay">
+  <div class="modal-sheet"><div class="modal-handle"></div><div class="p-5">
+    <h3 id="firma-titulo" class="font-display font-bold text-lg text-sf-800 mb-4"></h3>
+    <div class="mb-4"><label class="block text-xs font-medium text-sf-500 mb-1">Nombre completo</label><input id="firma-nombre" type="text" class="input" placeholder="Quien firma..."></div>
+    <div class="mb-3"><label class="block text-xs font-medium text-sf-500 mb-1">Firma</label><div class="relative"><canvas id="firma-canvas" class="sig-canvas w-full" height="160"></canvas><div id="firma-placeholder" class="sig-placeholder"><i class="fas fa-pen-nib mr-2"></i>Firmar aqui con el dedo</div></div><button type="button" onclick="clearFirma()" class="text-xs text-sf-400 hover:text-sf-600 mt-1.5"><i class="fas fa-eraser mr-1"></i>Borrar firma</button></div>
+    <div class="mb-4"><label class="block text-xs font-medium text-sf-500 mb-1">Observaciones</label><textarea id="firma-obs" class="input" rows="2" placeholder="Opcional..."></textarea></div>
+    <div class="flex gap-3"><button onclick="closeFirmaModal()" class="flex-1 py-3 rounded-xl border border-sf-200 text-sf-500 font-display font-semibold text-sm">Cancelar</button><button id="firma-confirmar" class="flex-1 btn-pri">Confirmar</button></div>
+  </div></div>
+</div>
+
+<!-- MODAL CONFIRM -->
+<div id="modal-confirm" class="modal-overlay">
+  <div class="modal-sheet" style="max-height:auto"><div class="modal-handle"></div><div class="p-5 text-center">
+    <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-3"><i class="fas fa-exclamation-triangle text-amber-500"></i></div>
+    <p id="confirm-msg" class="text-sf-700 text-sm font-medium mb-5 leading-relaxed"></p>
+    <div class="flex gap-3"><button onclick="closeConfirm()" class="flex-1 py-2.5 rounded-xl border border-sf-200 text-sf-500 font-display font-semibold text-sm">No</button><button id="confirm-yes" class="flex-1 btn-pri">Si, confirmar</button></div>
+  </div></div>
+</div>
+
+<div id="print-area" class="hidden"></div>
+
+<script>
+/* URLs exactas de los logos */
+const LOGO_BLANCO='https://z-cdn-media.chatglm.cn/files/9d805ef2-3dbe-4508-8cd0-2267e85d32ee.jpg?auth_key=1887660730-6d52a47b9b004148928835cb5e17a7b1-0-096dcaf8bf48d338ed7861770cc1e73f';
+const LOGO_OSCURO='https://z-cdn-media.chatglm.cn/files/e15b86bf-6f96-4a4c-adc3-c442e1e7956d.jpg?auth_key=1887660730-2f7a1532bd92431bb1109a467c06b40d-0-f987008b8f3cff6e3d69623b387aa990';
+const LOGO_DEV='https://z-cdn-media.chatglm.cn/files/746e9c4a-0107-418b-b97c-e1860986518d.jpg?auth_key=1887660730-ef56643323eb44f9bb6655bdb25832d2-0-dd358a01e827678cdea0493e70636a15';
+
+/* Footer desarrollador reutilizable */
+function htmlFooter(){return `<div class="dev-footer"><img src="${LOGO_DEV}" alt="Sistema Vicus" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><p class="dev-footer-fb">Sistema Vicus &copy; 2026<br>Ing. Ramiro Perez</p></div>`}
+function inyectarFooters(){['dashboard','list','new','detail','profile'].forEach(v=>{const el=document.getElementById('footer-'+v);if(el)el.innerHTML=htmlFooter()})}
+
+/* Cargar logos */
+function cargarLogos(){
+  document.getElementById('login-logo-img').src=LOGO_BLANCO;
+  document.getElementById('dev-logo-login').src=LOGO_DEV;
+  document.getElementById('header-logo-img').src=LOGO_OSCURO;
+}
+
+/* Estado */
+let usuario=null,ordenes=[],nextId=1,currentView='dashboard',previousView='dashboard';
+let currentFilter='todas',currentDetailId=null,firmaPad=null,firmaCallback=null;
+const VER='v4';
+
+function datosEjemplo(){return[
+  {id:'OT-HNB-0001',fechaCreacion:'2025-01-20T08:15:00',creador:'Lopez, Ana',sectorSolicitante:'Guardia',ubicacion:'Piso 1 - Box 3',descripcion:'Luminaria del box 3 parpadea y se apaga intermitentemente. Posible problema en la conexion del fixture.',tipoTrabajo:'Electrico',prioridad:'Alta',estado:'Pendiente',operarioAsignado:'',fechaInicio:null,fechaFin:null,firmaOperario:null,nombreOperario:'',firmaConformidad:null,nombreConformidad:'',fechaConformidad:null,obsOperario:'',obsConformidad:'',trazabilidad:[{fecha:'2025-01-20T08:15:00',accion:'Orden creada',usuario:'Lopez, Ana',detalle:'Solicitada por guardia'}]},
+  {id:'OT-HNB-0002',fechaCreacion:'2025-01-20T09:30:00',creador:'Ramirez, Jorge',sectorSolicitante:'Terapia Intensiva',ubicacion:'UTI - Banio interno',descripcion:'Fuga de agua en canilla del banio interno de UTI. Se moja el piso y representa riesgo de caidas.',tipoTrabajo:'Plomeria / Sanitario',prioridad:'Urgente',estado:'En Proceso',operarioAsignado:'Garcia, Carlos',fechaInicio:'2025-01-20T09:45:00',fechaFin:null,firmaOperario:null,nombreOperario:'',firmaConformidad:null,nombreConformidad:'',fechaConformidad:null,obsOperario:'',obsConformidad:'',trazabilidad:[{fecha:'2025-01-20T09:30:00',accion:'Orden creada',usuario:'Ramirez, Jorge'},{fecha:'2025-01-20T09:45:00',accion:'Orden tomada',usuario:'Garcia, Carlos',detalle:'Asignada al operario'}]},
+  {id:'OT-HNB-0003',fechaCreacion:'2025-01-19T14:00:00',creador:'Fernandez, Maria',sectorSolicitante:'Maternidad',ubicacion:'Piso 3 - Habitacion 302',descripcion:'Puerta de la habitacion 302 no cierra correctamente. La cerradura esta desalineada.',tipoTrabajo:'Cerrajeria',prioridad:'Media',estado:'Conformidad Pendiente',operarioAsignado:'Lopez, Miguel',fechaInicio:'2025-01-19T14:30:00',fechaFin:'2025-01-19T15:20:00',firmaOperario:null,nombreOperario:'Lopez, Miguel',firmaConformidad:null,nombreConformidad:'',fechaConformidad:null,obsOperario:'Se realineo la cerradura y se lubrico el mecanismo. Funciona correctamente.',obsConformidad:'',trazabilidad:[{fecha:'2025-01-19T14:00:00',accion:'Orden creada',usuario:'Fernandez, Maria'},{fecha:'2025-01-19T14:30:00',accion:'Orden tomada',usuario:'Lopez, Miguel'},{fecha:'2025-01-19T15:20:00',accion:'Trabajo finalizado y firmado',usuario:'Lopez, Miguel'}]},
+  {id:'OT-HNB-0004',fechaCreacion:'2025-01-18T10:00:00',creador:'Gomez, Pablo',sectorSolicitante:'Laboratorio',ubicacion:'Subsuelo - Laboratorio Central',descripcion:'Equipo de aire acondicionado no enfria. Solo ventila aire ambiente. Posible falta de gas refrigerante.',tipoTrabajo:'Aire Acondicionado / Ventilacion',prioridad:'Baja',estado:'Conformada',operarioAsignado:'Rodriguez, Pedro',fechaInicio:'2025-01-18T11:00:00',fechaFin:'2025-01-18T14:30:00',firmaOperario:null,nombreOperario:'Rodriguez, Pedro',firmaConformidad:null,nombreConformidad:'Gomez, Pablo',fechaConformidad:'2025-01-18T15:00:00',obsOperario:'Se recargo gas R410A. Se verifico presion y funcionamiento correcto.',obsConformidad:'Correcto, el equipo enfria adecuadamente.',trazabilidad:[{fecha:'2025-01-18T10:00:00',accion:'Orden creada',usuario:'Gomez, Pablo'},{fecha:'2025-01-18T11:00:00',accion:'Orden tomada',usuario:'Rodriguez, Pedro'},{fecha:'2025-01-18T14:30:00',accion:'Trabajo finalizado y firmado',usuario:'Rodriguez, Pedro'},{fecha:'2025-01-18T15:00:00',accion:'Conformidad firmada por el sector',usuario:'Gomez, Pablo'}]}
+]}
+
+/* Utilidades */
+function ini(n){const p=n.trim().split(/\s+/);return p.length>=2?(p[0][0]+p[p.length-1][0]).toUpperCase():n.substring(0,2).toUpperCase()}
+function fmtF(i){if(!i)return'—';const d=new Date(i);return d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})}
+function fmtC(i){if(!i)return'—';return new Date(i).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'})}
+function ah(){return new Date().toISOString()}
+function gId(){return 'OT-HNB-'+String(nextId++).padStart(4,'0')}
+function badge(e){const m={'Pendiente':'badge-pendiente','En Proceso':'badge-proceso','Conformidad Pendiente':'badge-conformidad','Conformada':'badge-conformada'};const i={'Pendiente':'fa-clock','En Proceso':'fa-wrench','Conformidad Pendiente':'fa-handshake','Conformada':'fa-circle-check'};return `<span class="badge ${m[e]||''}"><i class="fas ${i[e]||''}" style="font-size:8px"></i>${e}</span>`}
+function priD(p){const c={'Baja':'#8A9080','Media':'#D4883A','Alta':'#E87040','Urgente':'#C44536'};return `<span class="inline-flex items-center"><span style="width:7px;height:7px;border-radius:50%;background:${c[p]||'#8A9080'};display:inline-block;margin-right:5px"></span><span class="text-xs">${p}</span></span>`}
+
+/* Toast */
+function toast(msg,type='success'){const t=document.createElement('div');const ic={success:'fa-check-circle',error:'fa-exclamation-circle',info:'fa-info-circle'};t.className=`toast toast-${type}`;t.innerHTML=`<i class="fas ${ic[type]||ic.info}"></i><span>${msg}</span>`;document.getElementById('toast-container').appendChild(t);requestAnimationFrame(()=>t.classList.add('show'));setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300)},3000)}
+
+/* Confirm */
+function showConfirm(msg,cb){document.getElementById('confirm-msg').textContent=msg;document.getElementById('modal-confirm').classList.add('active');document.getElementById('confirm-yes').onclick=()=>{closeConfirm();cb()}}
+function closeConfirm(){document.getElementById('modal-confirm').classList.remove('active')}
+
+/* Almacenamiento */
+function guardar(){try{localStorage.setItem('hnb_o4',JSON.stringify(ordenes));localStorage.setItem('hnb_n4',nextId);localStorage.setItem('hnb_v',VER)}catch(e){}}
+function cargar(){try{const v=localStorage.getItem('hnb_v'),d=localStorage.getItem('hnb_o4'),n=localStorage.getItem('hnb_n4');if(v===VER&&d){ordenes=JSON.parse(d);nextId=n?parseInt(n):ordenes.length+1}else{localStorage.clear();ordenes=datosEjemplo();nextId=5;guardar()}}catch(e){ordenes=datosEjemplo();nextId=5;guardar()}}
+function limpiarDatos(){showConfirm('Se restauraran los datos de ejemplo. Las ordenes actuales se perderan.',()=>{localStorage.clear();ordenes=datosEjemplo();nextId=5;guardar();toast('Datos restaurados','info');renderProfile()})}
+
+/* Navegacion */
+function showView(v){previousView=currentView;currentView=v;document.querySelectorAll('[id^="view-"]').forEach(el=>el.classList.add('hidden'));const t=document.getElementById('view-'+v);if(t)t.classList.remove('hidden');document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===v));if(v==='dashboard')renderDashboard();if(v==='list')renderList();if(v==='profile')renderProfile();window.scrollTo(0,0)}
+function goBack(){showView(previousView==='detail'?'list':previousView)}
+
+/* Dashboard */
+function renderDashboard(){
+  const h=new Date().getHours();document.getElementById('dash-saludo').textContent=(h<12?'Buenos dias':h<19?'Buenas tardes':'Buenas noches')+',';document.getElementById('dash-nombre').textContent=usuario.nombre;
+  const s={p:0,pr:0,c:0,co:0};ordenes.forEach(o=>{if(o.estado==='Pendiente')s.p++;else if(o.estado==='En Proceso')s.pr++;else if(o.estado==='Conformidad Pendiente')s.c++;else if(o.estado==='Conformada')s.co++});
+  document.getElementById('dash-stats').innerHTML=`
+    <div class="card p-3 cursor-pointer active:scale-[0.97] transition anim-in anim-d1" onclick="showView('list');setFilter('Pendiente')"><div class="flex items-center justify-between mb-1"><span class="text-[11px] text-sf-400 font-medium">Pendientes</span><div class="w-7 h-7 rounded-lg bg-sf-100 flex items-center justify-center"><i class="fas fa-clock text-sf-400 text-xs"></i></div></div><p class="font-display font-bold text-2xl text-sf-800">${s.p}</p></div>
+    <div class="card p-3 cursor-pointer active:scale-[0.97] transition anim-in anim-d2" onclick="showView('list');setFilter('En Proceso')"><div class="flex items-center justify-between mb-1"><span class="text-[11px] text-sf-400 font-medium">En Proceso</span><div class="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center"><i class="fas fa-wrench text-amber-600 text-xs"></i></div></div><p class="font-display font-bold text-2xl text-sf-800">${s.pr}</p></div>
+    <div class="card p-3 cursor-pointer active:scale-[0.97] transition anim-in anim-d3" onclick="showView('list');setFilter('Conformidad')"><div class="flex items-center justify-between mb-1"><span class="text-[11px] text-sf-400 font-medium">Por Conformidad</span><div class="w-7 h-7 rounded-lg bg-pri-50 flex items-center justify-center"><i class="fas fa-handshake text-pri-400 text-xs"></i></div></div><p class="font-display font-bold text-2xl text-sf-800">${s.c}</p></div>
+    <div class="card p-3 cursor-pointer active:scale-[0.97] transition anim-in anim-d4" onclick="showView('list');setFilter('Conformada')"><div class="flex items-center justify-between mb-1"><span class="text-[11px] text-sf-400 font-medium">Conformadas</span><div class="w-7 h-7 rounded-lg bg-acc-50 flex items-center justify-center"><i class="fas fa-circle-check text-acc-500 text-xs"></i></div></div><p class="font-display font-bold text-2xl text-sf-800">${s.co}</p></div>`;
+  const rec=[...ordenes].sort((a,b)=>new Date(b.fechaCreacion)-new Date(a.fechaCreacion)).slice(0,5);
+  document.getElementById('dash-recientes').innerHTML=rec.length?rec.map((o,i)=>`<div class="card p-3 card-hover anim-in" style="animation-delay:${Math.min(i*0.05,0.2)}s" onclick="openDetail('${o.id}')"><div class="flex items-start justify-between mb-1"><span class="font-display font-semibold text-sm text-sf-800">${o.id}</span>${badge(o.estado)}</div><p class="text-xs text-sf-600 mb-1" style="display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden">${o.descripcion}</p><div class="flex items-center justify-between"><span class="text-[10px] text-sf-400"><i class="fas fa-location-dot mr-1"></i>${o.sectorSolicitante} — ${o.ubicacion}</span><span class="text-[10px] text-sf-300">${fmtC(o.fechaCreacion)}</span></div></div>`).join(''):'<p class="text-center text-sf-400 text-sm py-8">No hay ordenes registradas</p>';
+}
+
+/* Listado */
+function setFilter(f){currentFilter=f;document.querySelectorAll('#view-list .chip').forEach(c=>c.classList.toggle('active',c.dataset.filter===f));renderList()}
+function renderList(){
+  const q=(document.getElementById('list-search')?.value||'').toLowerCase();
+  let f=[...ordenes].sort((a,b)=>new Date(b.fechaCreacion)-new Date(a.fechaCreacion));
+  if(currentFilter!=='todas'){if(currentFilter==='Conformidad')f=f.filter(o=>o.estado==='Conformidad Pendiente');else f=f.filter(o=>o.estado===currentFilter)}
+  if(q)f=f.filter(o=>o.id.toLowerCase().includes(q)||o.sectorSolicitante.toLowerCase().includes(q)||o.ubicacion.toLowerCase().includes(q)||o.descripcion.toLowerCase().includes(q));
+  const c=document.getElementById('list-items'),e=document.getElementById('list-empty');
+  if(!f.length){c.innerHTML='';e.classList.remove('hidden');return}e.classList.add('hidden');
+  c.innerHTML=f.map((o,i)=>`<div class="card p-3 card-hover anim-in" style="animation-delay:${Math.min(i*0.04,0.2)}s" onclick="openDetail('${o.id}')"><div class="flex items-start justify-between mb-1"><div class="flex items-center gap-2"><span class="font-display font-semibold text-sm text-sf-800">${o.id}</span><span class="text-[10px] text-sf-300">${fmtC(o.fechaCreacion)}</span></div>${badge(o.estado)}</div><p class="text-xs text-sf-600 mb-1.5" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${o.descripcion}</p><div class="flex items-center justify-between"><span class="text-[10px] text-sf-400"><i class="fas fa-location-dot mr-1"></i>${o.sectorSolicitante}</span><div class="flex items-center gap-2.5">${o.operarioAsignado?`<span class="text-[10px] text-sf-400"><i class="fas fa-user-gear mr-0.5"></i>${o.operarioAsignado.split(',')[0]}</span>`:''}${priD(o.prioridad)}</div></div></div>`).join('');
+}
+
+/* Detalle */
+function openDetail(id){currentDetailId=id;showView('detail');renderDetail()}
+function renderDetail(){
+  const o=ordenes.find(x=>x.id===currentDetailId);if(!o)return;let a='';
+  if(o.estado==='Pendiente')a=`<button onclick="tomarOrden('${o.id}')" class="btn-amber"><i class="fas fa-hand mr-2"></i>Tomar Orden</button>`;
+  else if(o.estado==='En Proceso')a=`<button onclick="finalizarOrden('${o.id}')" class="btn-green"><i class="fas fa-check mr-2"></i>Finalizar Trabajo y Firmar</button>`;
+  else if(o.estado==='Conformidad Pendiente')a=`<button onclick="conformarOrden('${o.id}')" class="btn-blue"><i class="fas fa-signature mr-2"></i>Firmar Conformidad del Sector</button>`;
+  else if(o.estado==='Conformada')a=`<button onclick="imprimirOrden('${o.id}')" class="btn-pri"><i class="fas fa-print mr-2"></i>Imprimir / Compartir</button><button onclick="eliminarOrden('${o.id}')" class="w-full py-2.5 rounded-xl border border-red-200 text-red-400 font-display font-semibold text-xs mt-2 active:scale-[0.98] transition"><i class="fas fa-trash mr-1"></i>Eliminar Orden</button>`;
+  document.getElementById('detail-content').innerHTML=`<div class="anim-in">
+    <div class="card p-4 mb-2.5"><div class="flex items-start justify-between mb-2"><div><h2 class="font-display font-bold text-lg text-sf-800">${o.id}</h2><p class="text-[10px] text-sf-400">Creada: ${fmtF(o.fechaCreacion)} por ${o.creador}</p></div>${badge(o.estado)}</div><div class="flex gap-4 text-xs">${priD(o.prioridad)}<span class="text-sf-400"><i class="fas fa-wrench mr-1"></i>${o.tipoTrabajo}</span></div></div>
+    <div class="card p-4 mb-2.5"><h3 class="font-display font-semibold text-[10px] text-sf-400 uppercase tracking-wider mb-2.5">Datos de la Orden</h3><div class="space-y-2 text-sm"><div class="flex justify-between"><span class="text-sf-400">Sector</span><span class="text-sf-700 font-medium text-right">${o.sectorSolicitante}</span></div><div class="flex justify-between"><span class="text-sf-400">Ubicacion</span><span class="text-sf-700 font-medium text-right max-w-[60%]">${o.ubicacion}</span></div><div class="flex justify-between"><span class="text-sf-400">Operario</span><span class="text-sf-700 font-medium">${o.operarioAsignado||'Sin asignar'}</span></div>${o.fechaInicio?`<div class="flex justify-between"><span class="text-sf-400">Inicio</span><span class="text-sf-700 font-medium">${fmtF(o.fechaInicio)}</span></div>`:''}${o.fechaFin?`<div class="flex justify-between"><span class="text-sf-400">Finalizacion</span><span class="text-sf-700 font-medium">${fmtF(o.fechaFin)}</span></div>`:''}${o.fechaConformidad?`<div class="flex justify-between"><span class="text-sf-400">Conformidad</span><span class="text-sf-700 font-medium">${fmtF(o.fechaConformidad)}</span></div>`:''}</div></div>
+    <div class="card p-4 mb-2.5"><h3 class="font-display font-semibold text-[10px] text-sf-400 uppercase tracking-wider mb-2">Descripcion</h3><p class="text-sm text-sf-700 leading-relaxed">${o.descripcion}</p></div>
+    ${o.obsOperario?`<div class="card p-4 mb-2.5"><h3 class="font-display font-semibold text-[10px] text-sf-400 uppercase tracking-wider mb-2">Observaciones del Operario</h3><p class="text-sm text-sf-700 leading-relaxed">${o.obsOperario}</p></div>`:''}
+    ${o.firmaOperario?`<div class="card p-4 mb-2.5"><h3 class="font-display font-semibold text-[10px] text-sf-400 uppercase tracking-wider mb-2">Firma del Operario</h3><div class="flex items-center gap-3"><img src="${o.firmaOperario}" class="h-14 bg-sf-50 rounded border border-sf-100" alt="Firma"><div><p class="text-sm text-sf-700 font-medium">${o.nombreOperario}</p><p class="text-[10px] text-sf-400">${fmtF(o.fechaFin)}</p></div></div></div>`:''}
+    ${o.obsConformidad?`<div class="card p-4 mb-2.5"><h3 class="font-display font-semibold text-[10px] text-sf-400 uppercase tracking-wider mb-2">Observaciones del Sector</h3><p class="text-sm text-sf-700 leading-relaxed">${o.obsConformidad}</p></div>`:''}
+    ${o.firmaConformidad?`<div class="card p-4 mb-2.5"><h3 class="font-display font-semibold text-[10px] text-sf-400 uppercase tracking-wider mb-2">Conformidad del Sector</h3><div class="flex items-center gap-3"><img src="${o.firmaConformidad}" class="h-14 bg-sf-50 rounded border border-sf-100" alt="Firma"><div><p class="text-sm text-sf-700 font-medium">${o.nombreConformidad}</p><p class="text-[10px] text-sf-400">${fmtF(o.fechaConformidad)}</p></div></div></div>`:''}
+    <div class="card p-4 mb-3"><h3 class="font-display font-semibold text-[10px] text-sf-400 uppercase tracking-wider mb-3">Trazabilidad</h3><div>${o.trazabilidad.map((t,i)=>`<div class="tl-item"><div class="tl-dot ${i===o.trazabilidad.length-1?'cur':''}"></div><p class="text-sm text-sf-700 font-medium">${t.accion}</p><p class="text-[11px] text-sf-400">${t.usuario} — ${fmtF(t.fecha)}</p>${t.detalle?`<p class="text-[11px] text-sf-500 mt-0.5">${t.detalle}</p>`:''}</div>`).join('')}</div></div>
+    ${a?`<div class="mt-3">${a}</div>`:''}</div>`;
+}
+
+/* Acciones */
+function tomarOrden(id){showConfirm('¿Tomas esta orden? Seras asignado como operario responsable.',()=>{const o=ordenes.find(x=>x.id===id);o.estado='En Proceso';o.operarioAsignado=usuario.nombre;o.fechaInicio=ah();o.trazabilidad.push({fecha:ah(),accion:'Orden tomada',usuario:usuario.nombre,detalle:'Asignada al operario'});guardar();renderDetail();toast('Orden tomada correctamente')})}
+function finalizarOrden(id){openFirmaModal('Firma del Operario',usuario.nombre,'Observaciones del trabajo realizado',true,(n,f,ob)=>{if(!n.trim()){toast('Ingresa tu nombre','error');return false}if(firmaIsEmpty()){toast('Debes firmar antes de confirmar','error');return false}const o=ordenes.find(x=>x.id===id);o.estado='Conformidad Pendiente';o.fechaFin=ah();o.firmaOperario=f;o.nombreOperario=n.trim();o.obsOperario=ob.trim();o.trazabilidad.push({fecha:ah(),accion:'Trabajo finalizado y firmado',usuario:n.trim(),detalle:ob.trim()||'Sin observaciones'});guardar();renderDetail();toast('Trabajo finalizado. Pendiente conformidad.','info');return true})}
+function conformarOrden(id){openFirmaModal('Conformidad del Sector','','Observaciones del sector (opcional)',false,(n,f,ob)=>{if(!n.trim()){toast('Ingresa el nombre de quien da conformidad','error');return false}if(firmaIsEmpty()){toast('Debes firmar antes de confirmar','error');return false}const o=ordenes.find(x=>x.id===id);o.estado='Conformada';o.fechaConformidad=ah();o.firmaConformidad=f;o.nombreConformidad=n.trim();o.obsConformidad=ob.trim();o.trazabilidad.push({fecha:ah(),accion:'Conformidad firmada por el sector',usuario:n.trim(),detalle:ob.trim()||'Sin observaciones'});guardar();renderDetail();toast('Conformidad registrada. Orden completada.');return true})}
+function eliminarOrden(id){showConfirm('¿Eliminar esta orden?',()=>{ordenes=ordenes.filter(o=>o.id!==id);guardar();showView('list');toast('Orden eliminada','info')})}
+
+/* Firma digital */
+class SigPad{constructor(c){this.c=c;this.x=c.getContext('2d');this.on=false;this.lx=0;this.ly=0;this.d=false;this.fit();c.addEventListener('touchstart',e=>this.s(e),{passive:false});c.addEventListener('touchmove',e=>this.m(e),{passive:false});c.addEventListener('touchend',e=>this.e(e),{passive:false});c.addEventListener('mousedown',e=>this.s(e));c.addEventListener('mousemove',e=>this.m(e));c.addEventListener('mouseup',e=>this.e(e));c.addEventListener('mouseleave',e=>this.e(e))}fit(){const r=this.c.getBoundingClientRect(),d=window.devicePixelRatio||1;this.c.width=r.width*d;this.c.height=r.height*d;this.x.scale(d,d);this.x.strokeStyle='#1B2A4A';this.x.lineWidth=2.5;this.x.lineCap='round';this.x.lineJoin='round'}p(e){const r=this.c.getBoundingClientRect();if(e.touches)return{x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top};return{x:e.clientX-r.left,y:e.clientY-r.top}}s(e){e.preventDefault();this.on=true;const p=this.p(e);this.lx=p.x;this.ly=p.y;this.d=true;document.getElementById('firma-placeholder')?.classList.add('hidden')}m(e){e.preventDefault();if(!this.on)return;const p=this.p(e);this.x.beginPath();this.x.moveTo(this.lx,this.ly);this.x.lineTo(p.x,p.y);this.x.stroke();this.lx=p.x;this.ly=p.y}e(e){if(e)e.preventDefault();this.on=false}clear(){this.x.clearRect(0,0,this.c.width,this.c.height);this.d=false;document.getElementById('firma-placeholder')?.classList.remove('hidden')}isEmpty(){return!this.d}toDataURL(){return this.c.toDataURL('image/png')}}
+function openFirmaModal(titulo,nomDef,obsPh,pre,cb){document.getElementById('firma-titulo').textContent=titulo;document.getElementById('firma-nombre').value=pre?nomDef:'';document.getElementById('firma-obs').placeholder=obsPh||'';document.getElementById('firma-obs').value='';document.getElementById('modal-firma').classList.add('active');firmaCallback=cb;setTimeout(()=>{const c=document.getElementById('firma-canvas');c.style.width='100%';c.style.height='160px';firmaPad=new SigPad(c)},120)}
+function closeFirmaModal(){document.getElementById('modal-firma').classList.remove('active');firmaPad=null;firmaCallback=null}
+function clearFirma(){if(firmaPad)firmaPad.clear()}
+function firmaIsEmpty(){return firmaPad?firmaPad.isEmpty():true}
+document.getElementById('firma-confirmar').addEventListener('click',()=>{if(!firmaCallback)return;const ok=firmaCallback(document.getElementById('firma-nombre').value,firmaPad?firmaPad.toDataURL():null,document.getElementById('firma-obs').value);if(ok!==false)closeFirmaModal()});
+
+/* Nueva OT */
+document.getElementById('form-new').addEventListener('submit',e=>{
+  e.preventDefault();const nv={id:gId(),fechaCreacion:ah(),creador:usuario.nombre,sectorSolicitante:document.getElementById('new-sector').value,ubicacion:document.getElementById('new-ubicacion').value.trim(),descripcion:document.getElementById('new-descripcion').value.trim(),tipoTrabajo:document.getElementById('new-tipo').value,prioridad:document.getElementById('new-prioridad').value,estado:'Pendiente',operarioAsignado:document.getElementById('new-operario').value.trim(),fechaInicio:null,fechaFin:null,firmaOperario:null,nombreOperario:'',firmaConformidad:null,nombreConformidad:'',fechaConformidad:null,obsOperario:'',obsConformidad:'',trazabilidad:[{fecha:ah(),accion:'Orden creada',usuario:usuario.nombre,detalle:`Sector: ${document.getElementById('new-sector').value} — Prioridad: ${document.getElementById('new-prioridad').value}`}]};
+  ordenes.push(nv);guardar();e.target.reset();document.getElementById('new-prioridad').value='Media';toast(`Orden ${nv.id} creada`);showView('list');
+});
+
+/* Imprimir */
+function imprimirOrden(id){
+  const o=ordenes.find(x=>x.id===id);if(!o)return;
+  document.getElementById('print-area').innerHTML=`<div style="text-align:center;border-bottom:2px solid #1B2A4A;padding-bottom:12px;margin-bottom:16px"><img src="${LOGO_OSCURO}" class="print-logo" alt="HNB" onerror="this.outerHTML='<b style=font-size:18px>Hospital Dr. Natalio Burd</b>'"><br><p style="margin:4px 0 0;font-size:11px;color:#666">Sector de Mantenimiento</p></div><h2>${o.id} — ${o.estado}</h2><table><tr><td style="width:38%;color:#666">Fecha</td><td>${fmtF(o.fechaCreacion)}</td></tr><tr><td style="color:#666">Creada por</td><td>${o.creador}</td></tr><tr><td style="color:#666">Sector</td><td>${o.sectorSolicitante}</td></tr><tr><td style="color:#666">Ubicacion</td><td>${o.ubicacion}</td></tr><tr><td style="color:#666">Tipo</td><td>${o.tipoTrabajo}</td></tr><tr><td style="color:#666">Prioridad</td><td>${o.prioridad}</td></tr><tr><td style="color:#666">Operario</td><td>${o.operarioAsignado||'—'}</td></tr>${o.fechaInicio?`<tr><td style="color:#666">Inicio</td><td>${fmtF(o.fechaInicio)}</td></tr>`:''}${o.fechaFin?`<tr><td style="color:#666">Fin</td><td>${fmtF(o.fechaFin)}</td></tr>`:''}${o.fechaConformidad?`<tr><td style="color:#666">Conformidad</td><td>${fmtF(o.fechaConformidad)}</td></tr>`:''}</table><h2>Descripcion</h2><p>${o.descripcion}</p>${o.obsOperario?`<h2>Obs. Operario</h2><p>${o.obsOperario}</p>`:''}${o.firmaOperario?`<h2>Firma Operario</h2><p><strong>${o.nombreOperario}</strong></p><img src="${o.firmaOperario}" class="sig-img" style="max-height:60px">`:''}${o.obsConformidad?`<h2>Obs. Sector</h2><p>${o.obsConformidad}</p>`:''}${o.firmaConformidad?`<h2>Conformidad</h2><p><strong>${o.nombreConformidad}</strong></p><img src="${o.firmaConformidad}" class="sig-img" style="max-height:60px">`:''}<h2>Trazabilidad</h2><table><tr style="background:#f0f0f0"><td style="color:#666">Fecha</td><td style="color:#666">Accion</td><td style="color:#666">Usuario</td></tr>${o.trazabilidad.map(t=>`<tr><td>${fmtF(t.fecha)}</td><td>${t.accion}</td><td>${t.usuario}</td></tr>`).join('')}</table><div style="text-align:center;margin-top:24px;padding-top:12px;border-top:1px solid #ddd"><img src="${LOGO_DEV}" class="print-dev" alt="Vicus" onerror="this.outerHTML='<p style=font-size:9px;color:#999>Sistema Vicus &copy; 2026</p>'"></div>`;
+  document.getElementById('print-area').classList.remove('hidden');setTimeout(()=>{window.print();setTimeout(()=>document.getElementById('print-area').classList.add('hidden'),500)},200);
+}
+
+/* Perfil */
+function renderProfile(){
+  document.getElementById('prof-iniciales').textContent=ini(usuario.nombre);document.getElementById('prof-nombre').textContent=usuario.nombre;
+  const r={operario:'Operario de Mantenimiento',solicitante:'Solicitante de Sector',supervisor:'Supervisor'};document.getElementById('prof-rol').textContent=r[usuario.rol]||usuario.rol;
+  document.getElementById('prof-total').textContent=ordenes.length;
+  const m=ordenes.filter(o=>o.operarioAsignado===usuario.nombre);
+  document.getElementById('prof-stats').innerHTML=`<div class="card p-3 text-center"><p class="font-display font-bold text-xl text-sf-800">${m.length}</p><p class="text-[10px] text-sf-400">Asignadas</p></div><div class="card p-3 text-center"><p class="font-display font-bold text-xl text-sf-800">${m.filter(o=>o.estado==='Conformada').length}</p><p class="text-[10px] text-sf-400">Completadas</p></div><div class="card p-3 text-center"><p class="font-display font-bold text-xl text-sf-800">${ordenes.filter(o=>o.creador===usuario.nombre).length}</p><p class="text-[10px] text-sf-400">Creadas</p></div>`;
+}
+
+/* ===== LOGIN: ocultar completamente al ingresar ===== */
+function ingresarApp(){
+  const n=document.getElementById('login-nombre').value.trim(),r=document.getElementById('login-rol').value;
+  if(!n){toast('Ingresa tu nombre','error');return}
+  usuario={nombre:n,rol:r};try{localStorage.setItem('hnb_user',JSON.stringify(usuario))}catch(e){}
+  /* Desaparecer login con fade out, luego display none */
+  const login=document.getElementById('screen-login');
+  login.classList.add('oculto');
+  setTimeout(()=>{login.style.display='none'},300);
+  /* Mostrar app */
+  const app=document.getElementById('screen-app');
+  app.style.display='block';
+  document.getElementById('header-iniciales').textContent=ini(n);
+  showView('dashboard');
+}
+
+document.getElementById('btn-login').addEventListener('click',ingresarApp);
+
+/* Cerrar sesion: mostrar login de vuelta */
+function cerrarSesion(){
+  showConfirm('¿Cerrar sesion?',()=>{
+    try{localStorage.removeItem('hnb_user')}catch(e){}
+    usuario=null;
+    /* Ocultar app */
+    document.getElementById('screen-app').style.display='none';
+    /* Mostrar login quitando la clase oculto */
+    const login=document.getElementById('screen-login');
+    login.style.display='flex';
+    /* Forzar reflow antes de sacar la clase para que la transicion funcione */
+    void login.offsetWidth;
+    login.classList.remove('oculto');
+    document.getElementById('login-nombre').value='';
+  });
+}
+
+/* Eventos globales */
+document.querySelectorAll('.nav-item').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+document.querySelectorAll('#view-list .chip').forEach(c=>c.addEventListener('click',()=>setFilter(c.dataset.filter)));
+document.getElementById('list-search')?.addEventListener('input',renderList);
+document.getElementById('modal-firma').addEventListener('click',e=>{if(e.target===document.getElementById('modal-firma'))closeFirmaModal()});
+document.getElementById('modal-confirm').addEventListener('click',e=>{if(e.target===document.getElementById('modal-confirm'))closeConfirm()});
+
+/* Init */
+(function(){
+  cargarLogos();
+  inyectarFooters();
+  cargar();
+  /* Si ya hay sesion, saltar login directamente */
+  try{const u=localStorage.getItem('hnb_user');if(u){usuario=JSON.parse(u);document.getElementById('screen-login').style.display='none';document.getElementById('screen-app').style.display='block';document.getElementById('header-iniciales').textContent=ini(usuario.nombre);showView('dashboard')}}catch(e){}
+})();
+</script>
+</body>
+</html>
